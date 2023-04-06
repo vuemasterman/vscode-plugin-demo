@@ -1,13 +1,18 @@
 import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient/node";
+import { Disposable, LanguageClient } from "vscode-languageclient/node";
 import { IcgdsCssCompletionProvider } from "../services/completionProvider";
 const registerCompletion = () => {
-  const disposable = vscode.languages.registerCompletionItemProvider(
-    { language: "typescriptreact", scheme: "file" },
-    new IcgdsCssCompletionProvider(),
-    `"`
+  const disposables: Disposable[] = [];
+  disposables.push(
+    vscode.languages.registerCompletionItemProvider(
+      { language: "typescriptreact", scheme: "file" },
+      new IcgdsCssCompletionProvider(),
+      `"`,
+      `\``,
+      ` `
+    )
   );
-  return [disposable];
+  return disposables;
 };
 
 export const register = (

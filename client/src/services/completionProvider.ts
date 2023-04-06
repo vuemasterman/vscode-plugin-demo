@@ -1,23 +1,42 @@
-import * as vscode from "vscode";
+import {
+  CompletionItemProvider,
+  TextDocument,
+  Position,
+  CancellationToken,
+  CompletionItem,
+} from "vscode";
 import { generateCssClassname } from "../utils/completion";
-export class IcgdsCssCompletionProvider
-  implements vscode.CompletionItemProvider
-{
+
+export class IcgdsCssCompletionProvider implements CompletionItemProvider {
   provideCompletionItems(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-    token: vscode.CancellationToken,
-    context: vscode.CompletionContext
+    document: TextDocument,
+    position: Position,
+    token: CancellationToken
   ) {
-    const linePrefix = document
-      .lineAt(position)
-      .text.substring(0, position.character);
-    if (linePrefix.endsWith('className="')) {
-      const classnameCompletionItem = generateCssClassname().map(
-        (item) => new vscode.CompletionItem(item.label)
-      );
-      return [...classnameCompletionItem];
+    const lineText = document.lineAt(position.line).text;
+    const quotes = lineText.match(/["']{1}/g);
+
+    if (!quotes || quotes.length < 2) {
+      return [];
     }
-    return undefined;
+
+    const [startQuote, endQuote] = quotes;
+
+    if (
+      position.character < lineText.indexOf(startQuote) ||
+      position.character > lineText.lastIndexOf(endQuote)
+    ) {
+      return [];
+    }
+
+    // const content = lineText.substring(
+    //   lineText.indexOf(startQuote) + 1,
+    //   lineText.lastIndexOf(endQuote)
+    // );
+
+    const classnameCompletionItem = generateCssClassname().map(
+      (item) => new CompletionItem(item.label)
+    );
+    return [...classnameCompletionItem];
   }
 }
